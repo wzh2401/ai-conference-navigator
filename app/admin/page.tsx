@@ -61,24 +61,35 @@ export default function AdminPage() {
 
     setUploading(true);
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-
-      const response = await fetch('/api/upload', {
+      // 第一步：从服务端获取签名上传 URL
+      const urlRes = await fetch('/api/upload-url', {
         method: 'POST',
-        body: formData,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filename: file.name, contentType: file.type }),
       });
 
-      const result = await response.json();
-      if (result.success) {
-        setUploadedFile(result);
-        alert('文件上传成功！');
-      } else {
-        alert('上传失败：' + (result.error || '未知错误'));
-      }
-    } catch (error) {
+      const { signedUrl, publicUrl, error } = await urlRes.json();
+      if (error) throw new Error(error);
+
+      // 第二步：浏览器直接上传到 Supabase Storage（绕过 Vercel 文件大小限制）
+      const uploadRes = await fetch(signedUrl, {
+        method: 'PUT',
+        headers: { 'Content-Type': file.type },
+        body: file,
+      });
+
+      if (!uploadRes.ok) throw new Error(`上传失败 (${uploadRes.status})`);
+
+      setUploadedFile({
+        success: true,
+        url: publicUrl,
+        originalName: file.name,
+        isVideo: file.type.startsWith('video/'),
+      });
+      alert('文件上传成功！');
+    } catch (error: any) {
       console.error('Upload failed:', error);
-      alert('文件上传失败');
+      alert('文件上传失败：' + (error.message || '未知错误'));
     } finally {
       setUploading(false);
     }
