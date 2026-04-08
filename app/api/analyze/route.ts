@@ -90,7 +90,7 @@ ${transcript}
     let result;
     try {
       const start = resultText.indexOf('{');
-      const end = resultText.rfind('}') + 1;
+      const end = resultText.lastIndexOf('}') + 1;
       const jsonStr = resultText.slice(start, end);
       result = JSON.parse(jsonStr);
     } catch (e) {
