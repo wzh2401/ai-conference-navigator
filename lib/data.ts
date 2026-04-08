@@ -5,7 +5,7 @@ export const speakers: Speaker[] = [
     id: "zhang-wei",
     name: "张伟",
     title: "AI创业者 / 前字节跳动产品总监",
-    avatar: "",
+    avatar: "https://api.dicebear.com/9.x/adventurer/svg?seed=zhangwei&backgroundColor=1e293b",
     audioSrc: "/audio/zhang-wei.mp3",
     dao: [
       {
@@ -105,7 +105,7 @@ export const speakers: Speaker[] = [
     id: "li-na",
     name: "李娜",
     title: "独立内容创作者 / 年入百万自媒体",
-    avatar: "",
+    avatar: "https://api.dicebear.com/9.x/adventurer/svg?seed=lina&backgroundColor=1e293b",
     audioSrc: "/audio/li-na.mp3",
     dao: [
       {
@@ -185,7 +185,7 @@ export const speakers: Speaker[] = [
     id: "wang-peng",
     name: "王鹏",
     title: "电商操盘手 / AI+电商实践者",
-    avatar: "",
+    avatar: "https://api.dicebear.com/9.x/adventurer/svg?seed=wangpeng&backgroundColor=1e293b",
     audioSrc: "/audio/wang-peng.mp3",
     dao: [
       {
