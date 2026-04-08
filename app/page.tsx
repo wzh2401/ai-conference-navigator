@@ -1,25 +1,42 @@
-'use client';
-
-import { useEffect } from 'react';
-import { speakers } from "@/lib/data";
+import { speakers as staticSpeakers } from "@/lib/data";
+import { supabase } from "@/lib/supabase";
 import QuoteWall from "@/components/QuoteWall";
 import SpeakerCard from "@/components/SpeakerCard";
 import Link from "next/link";
 import { Sparkles, Cpu, Zap, Brain, Terminal, Code, Star, Settings } from "lucide-react";
+import type { Speaker } from "@/lib/types";
 
-export default function Home() {
-  useEffect(() => {
-    const scrollToTop = () => {
-      window.scrollTo(0, 0);
-      document.documentElement.scrollTop = 0;
-      document.body.scrollTop = 0;
-    };
-    scrollToTop();
-    setTimeout(scrollToTop, 0);
-    setTimeout(scrollToTop, 50);
-    setTimeout(scrollToTop, 100);
-    setTimeout(scrollToTop, 200);
-  }, []);
+async function getSpeakers(): Promise<Speaker[]> {
+  try {
+    if (!supabase) return staticSpeakers;
+
+    const { data, error } = await supabase
+      .from('speakers')
+      .select('*')
+      .order('created_at', { ascending: true });
+
+    if (error || !data || data.length === 0) {
+      return staticSpeakers;
+    }
+
+    return data.map((row) => ({
+      id: row.id,
+      name: row.name,
+      title: row.title,
+      avatar: row.avatar || '',
+      audioSrc: row.audio_src || '',
+      dao: row.dao || [],
+      fa: row.fa || [],
+      shu: row.shu || [],
+      qi: row.qi || [],
+    }));
+  } catch {
+    return staticSpeakers;
+  }
+}
+
+export default async function Home() {
+  const speakers = await getSpeakers();
 
   return (
     <main className="min-h-screen gradient-bg relative overflow-hidden">
@@ -32,7 +49,7 @@ export default function Home() {
             <span className="text-sm font-bold">管理后台</span>
           </Link>
         </div>
-        
+
         <div className="inline-flex items-center gap-3 glass rounded-full px-5 py-2 mb-6 border border-blue-500/40 shadow-lg hover:shadow-blue-500/20 transition-all duration-500 border-gradient-blue">
           <div className="relative">
             <Sparkles className="w-4 h-4 text-blue-400 animate-pulse" />
@@ -42,7 +59,7 @@ export default function Home() {
             AI × 内容拆解 · 知识结构化引擎
           </span>
         </div>
-        
+
         <div className="float mb-6">
           <div className="relative inline-block">
             <h1 className="text-5xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-cyan-400 mb-1 tracking-tighter neon-blue">
@@ -53,7 +70,7 @@ export default function Home() {
             AI 大会
           </h2>
         </div>
-        
+
         <p className="text-slate-300 text-lg md:text-xl max-w-3xl mx-auto mb-10 leading-relaxed">
           按{" "}
           <span className="text-blue-400 font-bold relative inline-block group">
@@ -78,7 +95,7 @@ export default function Home() {
           四层结构整理嘉宾演讲精华
         </p>
 
-        {/* Tech Stats */}
+        {/* Stats */}
         <div className="flex flex-wrap justify-center gap-5">
           <div className="glass rounded-3xl px-7 py-5 border border-slate-700/50 hover-lift group border-gradient-blue relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-full shimmer pointer-events-none" />
@@ -92,7 +109,7 @@ export default function Home() {
               </div>
             </div>
           </div>
-          
+
           <div className="glass rounded-3xl px-7 py-5 border border-slate-700/50 hover-lift group relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-full shimmer pointer-events-none" />
             <div className="relative z-10 flex items-center gap-3">
@@ -105,7 +122,7 @@ export default function Home() {
               </div>
             </div>
           </div>
-          
+
           <div className="glass rounded-3xl px-7 py-5 border border-slate-700/50 hover-lift group relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-full shimmer pointer-events-none" />
             <div className="relative z-10 flex items-center gap-3">
@@ -120,7 +137,7 @@ export default function Home() {
               </div>
             </div>
           </div>
-          
+
           <div className="glass rounded-3xl px-7 py-5 border border-slate-700/50 hover-lift group relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-full shimmer pointer-events-none" />
             <div className="relative z-10 flex items-center gap-3">
@@ -166,7 +183,7 @@ export default function Home() {
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">探索每位嘉宾的智慧结晶</h2>
           <p className="text-slate-400 text-lg">点击卡片查看完整内容</p>
         </div>
-        
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-7">
           {speakers.map((speaker) => (
             <SpeakerCard key={speaker.id} speaker={speaker} />
