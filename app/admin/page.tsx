@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 import {
   Upload,
@@ -59,37 +60,38 @@ export default function AdminPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    if (!supabase) {
+      alert('Supabase 未配置，请检查环境变量');
+      return;
+    }
+
     setUploading(true);
     try {
-      // 第一步：从服务端获取签名上传 URL
-      const urlRes = await fetch('/api/upload-url', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ filename: file.name, contentType: file.type }),
-      });
+      const timestamp = Date.now();
+      const safeFilename = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
+      const path = `${timestamp}-${safeFilename}`;
 
-      const { signedUrl, publicUrl, error } = await urlRes.json();
-      if (error) throw new Error(error);
+      // 直接从浏览器上传到 Supabase Storage，完全绕过 Vercel
+      const { error } = await supabase.storage
+        .from('audio-files')
+        .upload(path, file, { contentType: file.type, upsert: false });
 
-      // 第二步：浏览器直接上传到 Supabase Storage（绕过 Vercel 文件大小限制）
-      const uploadRes = await fetch(signedUrl, {
-        method: 'PUT',
-        headers: { 'Content-Type': file.type },
-        body: file,
-      });
+      if (error) throw new Error(error.message);
 
-      if (!uploadRes.ok) throw new Error(`上传失败 (${uploadRes.status})`);
+      const { data: { publicUrl } } = supabase.storage
+        .from('audio-files')
+        .getPublicUrl(path);
 
       setUploadedFile({
         success: true,
         url: publicUrl,
         originalName: file.name,
-        isVideo: file.type.startsWith('video/'),
+        isVideo: false,
       });
-      alert('文件上传成功！');
+      alert('音频上传成功！');
     } catch (error: any) {
       console.error('Upload failed:', error);
-      alert('文件上传失败：' + (error.message || '未知错误'));
+      alert('上传失败：' + (error.message || '未知错误'));
     } finally {
       setUploading(false);
     }
@@ -298,11 +300,11 @@ function UploadTab({
 
       <div className="border-2 border-dashed border-blue-500/40 rounded-3xl p-12 text-center hover:border-blue-400/60 transition-all duration-300 bg-blue-500/5">
         <FileAudio className="w-16 h-16 text-blue-400 mx-auto mb-4" />
-        <h3 className="text-xl font-black text-white mb-2">上传音频或视频文件</h3>
-        <p className="text-slate-400 mb-6">支持 MP3, WAV, M4A, MP4, MOV, AVI 格式</p>
+        <h3 className="text-xl font-black text-white mb-2">上传音频文件</h3>
+        <p className="text-slate-400 mb-6">支持 MP3, WAV, M4A 格式</p>
         <input
           type="file"
-          accept="audio/*,video/*"
+          accept="audio/*"
           onChange={onFileUpload}
           disabled={uploading}
           className="hidden"
