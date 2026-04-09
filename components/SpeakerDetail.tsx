@@ -136,30 +136,30 @@ export default function SpeakerDetail({ speaker }: SpeakerDetailProps) {
             <TabsList className="w-full grid grid-cols-4 bg-slate-800/50 rounded-2xl p-1.5 gap-2">
               <TabsTrigger 
                 value="dao" 
-                className="text-slate-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/25 data-[state=active]:to-blue-600/25 data-[state=active]:text-blue-400 data-[state=active]:border data-[state=active]:border-blue-500/40 data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/20 rounded-xl text-sm font-bold transition-all duration-300"
+                className="text-slate-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/25 data-[state=active]:to-blue-600/25 data-[state=active]:text-blue-400 data-[state=active]:border data-[state=active]:border-blue-500/40 data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/20 rounded-xl text-sm font-bold transition-all duration-300 px-4 py-2"
               >
-                <BookOpen className="w-4 h-4 mr-1" />
+                <BookOpen className="w-4 h-4 mr-2" />
                 道
               </TabsTrigger>
               <TabsTrigger 
                 value="fa" 
-                className="text-slate-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500/25 data-[state=active]:to-purple-600/25 data-[state=active]:text-purple-400 data-[state=active]:border data-[state=active]:border-purple-500/40 data-[state=active]:shadow-lg data-[state=active]:shadow-purple-500/20 rounded-xl text-sm font-bold transition-all duration-300"
+                className="text-slate-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500/25 data-[state=active]:to-purple-600/25 data-[state=active]:text-purple-400 data-[state=active]:border data-[state=active]:border-purple-500/40 data-[state=active]:shadow-lg data-[state=active]:shadow-purple-500/20 rounded-xl text-sm font-bold transition-all duration-300 px-4 py-2"
               >
-                <Lightbulb className="w-4 h-4 mr-1" />
+                <Lightbulb className="w-4 h-4 mr-2" />
                 法
               </TabsTrigger>
               <TabsTrigger 
                 value="shu" 
-                className="text-slate-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500/25 data-[state=active]:to-green-600/25 data-[state=active]:text-green-400 data-[state=active]:border data-[state=active]:border-green-500/40 data-[state=active]:shadow-lg data-[state=active]:shadow-green-500/20 rounded-xl text-sm font-bold transition-all duration-300"
+                className="text-slate-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500/25 data-[state=active]:to-green-600/25 data-[state=active]:text-green-400 data-[state=active]:border data-[state=active]:border-green-500/40 data-[state=active]:shadow-lg data-[state=active]:shadow-green-500/20 rounded-xl text-sm font-bold transition-all duration-300 px-4 py-2"
               >
-                <Wrench className="w-4 h-4 mr-1" />
+                <Wrench className="w-4 h-4 mr-2" />
                 术
               </TabsTrigger>
               <TabsTrigger 
                 value="qi" 
-                className="text-slate-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500/25 data-[state=active]:to-orange-600/25 data-[state=active]:text-orange-400 data-[state=active]:border data-[state=active]:border-orange-500/40 data-[state=active]:shadow-lg data-[state=active]:shadow-orange-500/20 rounded-xl text-sm font-bold transition-all duration-300"
+                className="text-slate-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500/25 data-[state=active]:to-orange-600/25 data-[state=active]:text-orange-400 data-[state=active]:border data-[state=active]:border-orange-500/40 data-[state=active]:shadow-lg data-[state=active]:shadow-orange-500/20 rounded-xl text-sm font-bold transition-all duration-300 px-4 py-2"
               >
-                <Settings className="w-4 h-4 mr-1" />
+                <Settings className="w-4 h-4 mr-2" />
                 器
               </TabsTrigger>
             </TabsList>
