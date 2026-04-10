@@ -23,14 +23,17 @@ import {
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState('upload');
   const [uploading, setUploading] = useState(false);
+  const [transcribing, setTranscribing] = useState(false);
   const [processing, setProcessing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<any>(null);
+  const [originalFile, setOriginalFile] = useState<File | null>(null);
   const [analysisResult, setAnalysisResult] = useState<any>(null);
   const [transcript, setTranscript] = useState('');
   const [apiKey, setApiKey] = useState('');
+  const [transcribeApiKey, setTranscribeApiKey] = useState('');
   const [baseUrl, setBaseUrl] = useState('https://yinli.one/v1');
-  const [model, setModel] = useState('claude-sonnet-4-6');
+  const [model, setModel] = useState('claude-3-5-sonnet-20241022');
   const [speakerId, setSpeakerId] = useState('');
   const [speakerName, setSpeakerName] = useState('');
   const [speakerTitle, setSpeakerTitle] = useState('');
@@ -65,6 +68,7 @@ export default function AdminPage() {
       return;
     }
 
+    setOriginalFile(file);
     setUploading(true);
     try {
       const timestamp = Date.now();
@@ -94,6 +98,46 @@ export default function AdminPage() {
       alert('上传失败：' + (error.message || '未知错误'));
     } finally {
       setUploading(false);
+    }
+  };
+
+  const handleTranscribe = async () => {
+    if (!originalFile) {
+      alert('请先上传音频文件');
+      return;
+    }
+    const key = transcribeApiKey || apiKey;
+    if (!key) {
+      alert('请先在「配置」tab 填入 API Key');
+      return;
+    }
+
+    setTranscribing(true);
+    try {
+      const fd = new FormData();
+      fd.append('file', originalFile);
+      fd.append('model', 'whisper-1');
+      fd.append('language', 'zh');
+      fd.append('prompt', '以下是普通话演讲内容，请使用简体中文转写。');
+
+      const response = await fetch(`${baseUrl}/audio/transcriptions`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${key}` },
+        body: fd,
+      });
+
+      const result = await response.json();
+      if (result.text) {
+        setTranscript(result.text);
+        setActiveTab('process');
+      } else {
+        alert('转写失败：' + (result.error?.message || JSON.stringify(result)));
+      }
+    } catch (error) {
+      console.error('Transcribe failed:', error);
+      alert('转写失败，请检查网络或API配置');
+    } finally {
+      setTranscribing(false);
     }
   };
 
@@ -239,7 +283,9 @@ export default function AdminPage() {
           {activeTab === 'upload' && (
             <UploadTab
               uploading={uploading}
+              transcribing={transcribing}
               onFileUpload={handleFileUpload}
+              onTranscribe={handleTranscribe}
               uploadedFile={uploadedFile}
             />
           )}
@@ -273,6 +319,8 @@ export default function AdminPage() {
             <SettingsTab
               apiKey={apiKey}
               setApiKey={setApiKey}
+              transcribeApiKey={transcribeApiKey}
+              setTranscribeApiKey={setTranscribeApiKey}
               baseUrl={baseUrl}
               setBaseUrl={setBaseUrl}
               model={model}
@@ -287,11 +335,15 @@ export default function AdminPage() {
 
 function UploadTab({
   uploading,
+  transcribing,
   onFileUpload,
+  onTranscribe,
   uploadedFile,
 }: {
   uploading: boolean;
+  transcribing: boolean;
   onFileUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onTranscribe: () => void;
   uploadedFile: any;
 }) {
   return (
@@ -329,7 +381,7 @@ function UploadTab({
       </div>
 
       {uploadedFile && (
-        <div className="bg-slate-800/50 rounded-2xl p-6 border border-green-500/40">
+        <div className="bg-slate-800/50 rounded-2xl p-6 border border-green-500/40 space-y-4">
           <div className="flex items-center gap-3">
             <CheckCircle className="w-6 h-6 text-green-400 shrink-0" />
             <div>
@@ -343,6 +395,26 @@ function UploadTab({
               </p>
               <p className="text-slate-400 text-sm break-all">{uploadedFile.url}</p>
             </div>
+          </div>
+          <div className="pt-2 border-t border-slate-700/50">
+            <p className="text-slate-400 text-sm mb-3">音频上传成功！下一步：自动转写为逐字稿</p>
+            <button
+              onClick={onTranscribe}
+              disabled={transcribing}
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white font-black px-8 py-4 rounded-2xl transition-all duration-300 shadow-lg shadow-cyan-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {transcribing ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  转写中，请稍候...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-5 h-5" />
+                  一键转写逐字稿
+                </>
+              )}
+            </button>
           </div>
         </div>
       )}
@@ -586,6 +658,8 @@ function ReviewTab({
 function SettingsTab({
   apiKey,
   setApiKey,
+  transcribeApiKey,
+  setTranscribeApiKey,
   baseUrl,
   setBaseUrl,
   model,
@@ -593,6 +667,8 @@ function SettingsTab({
 }: {
   apiKey: string;
   setApiKey: (v: string) => void;
+  transcribeApiKey: string;
+  setTranscribeApiKey: (v: string) => void;
   baseUrl: string;
   setBaseUrl: (v: string) => void;
   model: string;
@@ -609,11 +685,11 @@ function SettingsTab({
         </h3>
         <div className="space-y-4">
           <div>
-            <label className="text-slate-400 text-sm mb-2 block font-bold">API Key</label>
+            <label className="text-slate-400 text-sm mb-2 block font-bold">API Key <span className="text-slate-500 font-normal">（用 default 分组的 Key，转写和分析共用）</span></label>
             <input
               type="password"
               value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
+              onChange={(e) => { setApiKey(e.target.value); setTranscribeApiKey(e.target.value); }}
               placeholder="sk-..."
               className="w-full bg-slate-900/50 border border-slate-700/50 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/50"
             />

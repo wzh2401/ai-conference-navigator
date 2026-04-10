@@ -8,7 +8,7 @@ export async function POST(request: Request) {
       transcript,
       apiKey,
       baseUrl = 'https://yinli.one/v1',
-      model = 'claude-sonnet-4-6',
+      model = 'claude-3-5-sonnet-20241022',
       speakerId,
       speakerName,
       speakerTitle,
