@@ -116,22 +116,20 @@ export default function AdminPage() {
     try {
       const fd = new FormData();
       fd.append('file', originalFile);
-      fd.append('model', 'whisper-1');
-      fd.append('language', 'zh');
-      fd.append('prompt', '以下是普通话演讲内容，请使用简体中文转写。');
+      fd.append('apiKey', key);
+      fd.append('baseUrl', baseUrl);
 
-      const response = await fetch(`${baseUrl}/audio/transcriptions`, {
+      const response = await fetch('/api/transcribe', {
         method: 'POST',
-        headers: { Authorization: `Bearer ${key}` },
         body: fd,
       });
 
       const result = await response.json();
-      if (result.text) {
-        setTranscript(result.text);
+      if (result.success) {
+        setTranscript(result.transcript);
         setActiveTab('process');
       } else {
-        alert('转写失败：' + (result.error?.message || JSON.stringify(result)));
+        alert('转写失败：' + (result.error || '未知错误') + (result.details ? '\n' + result.details : ''));
       }
     } catch (error) {
       console.error('Transcribe failed:', error);
